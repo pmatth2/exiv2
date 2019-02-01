@@ -75,19 +75,19 @@ namespace Exiv2 {
     void MrwImage::setExifData(const ExifData& /*exifData*/)
     {
         // Todo: implement me!
-        throw(Error(kerInvalidSettingForImage, "Exif metadata", "MRW"));
+        throw(Error(ErrorCode::kerInvalidSettingForImage, "Exif metadata", "MRW"));
     }
 
     void MrwImage::setIptcData(const IptcData& /*iptcData*/)
     {
         // Todo: implement me!
-        throw(Error(kerInvalidSettingForImage, "IPTC metadata", "MRW"));
+        throw(Error(ErrorCode::kerInvalidSettingForImage, "IPTC metadata", "MRW"));
     }
 
     void MrwImage::setComment(const std::string& /*comment*/)
     {
         // not supported
-        throw(Error(kerInvalidSettingForImage, "Image comment", "MRW"));
+        throw(Error(ErrorCode::kerInvalidSettingForImage, "Image comment", "MRW"));
     }
 
     void MrwImage::readMetadata()
@@ -96,13 +96,13 @@ namespace Exiv2 {
         std::cerr << "Reading MRW file " << io_->path() << "\n";
 #endif
         if (io_->open() != 0) {
-            throw Error(kerDataSourceOpenFailed, io_->path(), strError());
+            throw Error(ErrorCode::kerDataSourceOpenFailed, io_->path(), strError());
         }
         IoCloser closer(*io_);
         // Ensure that this is the correct image type
         if (!isMrwType(*io_, false)) {
-            if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
-            throw Error(kerNotAnImage, "MRW");
+            if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
+            throw Error(ErrorCode::kerNotAnImage, "MRW");
         }
         clearMetadata();
 
@@ -114,26 +114,26 @@ namespace Exiv2 {
         uint32_t const end = getULong(tmp + 4, bigEndian);
 
         pos += len;
-        if (pos > end) throw Error(kerFailedToReadImageData);
+        if (pos > end) throw Error(ErrorCode::kerFailedToReadImageData);
         io_->read(tmp, len);
-        if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
+        if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
 
         while (memcmp(tmp + 1, "TTW", 3) != 0) {
             uint32_t const siz = getULong(tmp + 4, bigEndian);
             pos += siz;
-            if (pos > end) throw Error(kerFailedToReadImageData);
+            if (pos > end) throw Error(ErrorCode::kerFailedToReadImageData);
             io_->seek(siz, BasicIo::cur);
-            if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
+            if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
 
             pos += len;
-            if (pos > end) throw Error(kerFailedToReadImageData);
+            if (pos > end) throw Error(ErrorCode::kerFailedToReadImageData);
             io_->read(tmp, len);
-            if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
+            if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
         }
 
         DataBuf buf(getULong(tmp + 4, bigEndian));
         io_->read(buf.pData_, buf.size_);
-        if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
+        if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
 
         ByteOrder bo = TiffParser::decode(exifData_,
                                           iptcData_,
@@ -146,7 +146,7 @@ namespace Exiv2 {
     void MrwImage::writeMetadata()
     {
         // Todo: implement me!
-        throw(Error(kerWritingImageFormatUnsupported, "MRW"));
+        throw(Error(ErrorCode::kerWritingImageFormatUnsupported, "MRW"));
     } // MrwImage::writeMetadata
 
     // *************************************************************************

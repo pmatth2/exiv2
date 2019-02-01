@@ -109,7 +109,7 @@ namespace Exiv2 {
         // From a tEXt, zTXt, or iTXt chunk,
         // we get the key, it's a null terminated string at the chunk start
         const int offset = stripHeader ? 8 : 0;
-        if (data.size_ <= offset) throw Error(kerFailedToReadImageData);
+        if (data.size_ <= offset) throw Error(ErrorCode::kerFailedToReadImageData);
         const byte *key = data.pData_ + offset;
 
         // Find null string at end of key.
@@ -119,7 +119,7 @@ namespace Exiv2 {
             keysize++;
             // look if keysize is valid.
             if (keysize+offset >= data.size_)
-                throw Error(kerFailedToReadImageData);
+                throw Error(ErrorCode::kerFailedToReadImageData);
         }
 
         return DataBuf(key, keysize);
@@ -134,7 +134,7 @@ namespace Exiv2 {
 
         if(type == zTXt_Chunk)
         {
-            enforce(data.size_ >= Safe::add(keysize, 2), Exiv2::kerCorruptedMetadata);
+            enforce(data.size_ >= Safe::add(keysize, 2), ErrorCode::kerCorruptedMetadata);
 
             // Extract a deflate compressed Latin-1 text chunk
 
@@ -146,19 +146,19 @@ namespace Exiv2 {
 #ifdef DEBUG
                 std::cerr << "Exiv2::PngChunk::parseTXTChunk: Non-standard zTXt compression method.\n";
 #endif
-                throw Error(kerFailedToReadImageData);
+                throw Error(ErrorCode::kerFailedToReadImageData);
             }
 
             // compressed string after the compression technique spec
             const byte* compressedText      = data.pData_ + keysize + 2;
             long compressedTextSize = data.size_  - keysize - 2;
-            enforce(compressedTextSize < data.size_, kerCorruptedMetadata);
+            enforce(compressedTextSize < data.size_, ErrorCode::kerCorruptedMetadata);
 
             zlibUncompress(compressedText, compressedTextSize, arr);
         }
         else if(type == tEXt_Chunk)
         {
-            enforce(data.size_ >= Safe::add(keysize, 1), Exiv2::kerCorruptedMetadata);
+            enforce(data.size_ >= Safe::add(keysize, 1), ErrorCode::kerCorruptedMetadata);
             // Extract a non-compressed Latin-1 text chunk
 
             // the text comes after the key, but isn't null terminated
@@ -169,9 +169,9 @@ namespace Exiv2 {
         }
         else if(type == iTXt_Chunk)
         {
-            enforce(data.size_ >= Safe::add(keysize, 3), Exiv2::kerCorruptedMetadata);
+            enforce(data.size_ >= Safe::add(keysize, 3), ErrorCode::kerCorruptedMetadata);
             const size_t nullSeparators = std::count(&data.pData_[keysize+3], &data.pData_[data.size_], '\0');
-            enforce(nullSeparators >= 2, Exiv2::kerCorruptedMetadata);
+            enforce(nullSeparators >= 2, ErrorCode::kerCorruptedMetadata);
 
             // Extract a deflate compressed or uncompressed UTF-8 text chunk
 
@@ -180,8 +180,8 @@ namespace Exiv2 {
             // we get the compression method after the compression flag
             const byte compressionMethod = data.pData_[keysize + 2];
 
-            enforce(compressionFlag == 0x00 || compressionFlag == 0x01, Exiv2::kerCorruptedMetadata);
-            enforce(compressionMethod == 0x00, Exiv2::kerCorruptedMetadata);
+            enforce(compressionFlag == 0x00 || compressionFlag == 0x01, ErrorCode::kerCorruptedMetadata);
+            enforce(compressionMethod == 0x00, ErrorCode::kerCorruptedMetadata);
 
             // language description string after the compression technique spec
             const size_t languageTextMaxSize = data.size_ - keysize - 3;
@@ -191,7 +191,7 @@ namespace Exiv2 {
 
             enforce(static_cast<unsigned long>(data.size_) >=
                     Safe::add(static_cast<size_t>(Safe::add(keysize, 4)), languageTextSize),
-                    Exiv2::kerCorruptedMetadata);
+                    ErrorCode::kerCorruptedMetadata);
             // translated keyword string after the language description
             std::string translatedKeyText =
                 string_from_unterminated((const char*)(data.pData_ + keysize + 3 + languageTextSize + 1),
@@ -201,7 +201,7 @@ namespace Exiv2 {
             if ((compressionFlag == 0x00) || (compressionFlag == 0x01 && compressionMethod == 0x00)) {
                 enforce(Safe::add(static_cast<unsigned int>(keysize + 3 + languageTextSize + 1),
                                   Safe::add(translatedKeyTextSize, 1u)) <= static_cast<unsigned int>(data.size_),
-                        Exiv2::kerCorruptedMetadata);
+                        ErrorCode::kerCorruptedMetadata);
 
                 const byte* text = data.pData_ + keysize + 3 + languageTextSize + 1 + translatedKeyTextSize + 1;
                 const long textsize = static_cast<long>(data.size_ - (keysize + 3 + languageTextSize + 1 + translatedKeyTextSize + 1));
@@ -228,7 +228,7 @@ namespace Exiv2 {
 #ifdef DEBUG
                 std::cerr << "Exiv2::PngChunk::parseTXTChunk: Non-standard iTXt compression method.\n";
 #endif
-                throw Error(kerFailedToReadImageData);
+                throw Error(ErrorCode::kerFailedToReadImageData);
             }
         }
         else
@@ -236,7 +236,7 @@ namespace Exiv2 {
 #ifdef DEBUG
             std::cerr << "Exiv2::PngChunk::parseTXTChunk: We found a field, not expected though\n";
 #endif
-            throw Error(kerFailedToReadImageData);
+            throw Error(ErrorCode::kerFailedToReadImageData);
         }
 
         return arr;
@@ -481,13 +481,13 @@ namespace Exiv2 {
             }
             else {
                 // something bad happened
-                throw Error(kerFailedToReadImageData);
+                throw Error(ErrorCode::kerFailedToReadImageData);
             }
         }
         while (zlibResult == Z_BUF_ERROR);
 
         if (zlibResult != Z_OK) {
-            throw Error(kerFailedToReadImageData);
+            throw Error(ErrorCode::kerFailedToReadImageData);
         }
     } // PngChunk::zlibUncompress
 
@@ -515,11 +515,11 @@ namespace Exiv2 {
 #endif
                 compressedLen *= 2;
                 // DoS protection. Cap max compressed size
-                if ( compressedLen > 131072 ) throw Error(kerFailedToReadImageData);
+                if ( compressedLen > 131072 ) throw Error(ErrorCode::kerFailedToReadImageData);
                 break;
             default:
                 // Something bad happened
-                throw Error(kerFailedToReadImageData);
+                throw Error(ErrorCode::kerFailedToReadImageData);
             }
         } while (zlibResult == Z_BUF_ERROR);
 

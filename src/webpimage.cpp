@@ -106,7 +106,7 @@ namespace Exiv2 {
     void WebPImage::setComment(const std::string& /*comment*/)
     {
         // not supported
-        throw(Error(kerInvalidSettingForImage, "Image comment", "WebP"));
+        throw(Error(ErrorCode::kerInvalidSettingForImage, "Image comment", "WebP"));
     }
 
     /* =========================================== */
@@ -114,7 +114,7 @@ namespace Exiv2 {
     void WebPImage::writeMetadata()
     {
         if (io_->open() != 0) {
-            throw Error(kerDataSourceOpenFailed, io_->path(), strError());
+            throw Error(ErrorCode::kerDataSourceOpenFailed, io_->path(), strError());
         }
         IoCloser closer(*io_);
         BasicIo::UniquePtr tempIo(new MemIo);
@@ -128,8 +128,8 @@ namespace Exiv2 {
 
     void WebPImage::doWriteMetadata(BasicIo& outIo)
     {
-        if (!io_->isopen()) throw Error(kerInputDataReadFailed);
-        if (!outIo.isopen()) throw Error(kerImageWriteFailed);
+        if (!io_->isopen()) throw Error(ErrorCode::kerInputDataReadFailed);
+        if (!outIo.isopen()) throw Error(ErrorCode::kerImageWriteFailed);
 
 #ifdef DEBUG
         std::cout << "Writing metadata" << std::endl;
@@ -144,7 +144,7 @@ namespace Exiv2 {
 
         /* Set up header */
         if (outIo.write(data, WEBP_TAG_SIZE * 3) != WEBP_TAG_SIZE * 3)
-            throw Error(kerImageWriteFailed);
+            throw Error(ErrorCode::kerImageWriteFailed);
 
         /* Parse Chunks */
         bool has_size  = false;
@@ -332,21 +332,21 @@ namespace Exiv2 {
                 }
 
                 if (outIo.write(chunkId.pData_, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
                 if (outIo.write(size_buff, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
                 if (outIo.write(payload.pData_, payload.size_) != payload.size_)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
                 if (outIo.tell() % 2) {
-                    if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(kerImageWriteFailed);
+                    if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(ErrorCode::kerImageWriteFailed);
                 }
 
                 if (has_icc) {
-                    if (outIo.write((const byte*)WEBP_CHUNK_HEADER_ICCP, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+                    if (outIo.write((const byte*)WEBP_CHUNK_HEADER_ICCP, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
                     ul2Data(data, (uint32_t) iccProfile_.size_, littleEndian);
-                    if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+                    if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
                     if (outIo.write(iccProfile_.pData_, iccProfile_.size_) != iccProfile_.size_) {
-                        throw Error(kerImageWriteFailed);
+                        throw Error(ErrorCode::kerImageWriteFailed);
                     }
                     has_icc = false;
                 }
@@ -358,42 +358,42 @@ namespace Exiv2 {
                 // Skip and add new data afterwards
             } else {
                 if (outIo.write(chunkId.pData_, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
                 if (outIo.write(size_buff, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
                 if (outIo.write(payload.pData_, payload.size_) != payload.size_)
-                    throw Error(kerImageWriteFailed);
+                    throw Error(ErrorCode::kerImageWriteFailed);
             }
 
             // Encoder required to pad odd sized data with a null byte
             if (outIo.tell() % 2) {
-                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(kerImageWriteFailed);
+                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(ErrorCode::kerImageWriteFailed);
             }
         }
 
         if (has_exif) {
-            if (outIo.write((const byte*)WEBP_CHUNK_HEADER_EXIF, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+            if (outIo.write((const byte*)WEBP_CHUNK_HEADER_EXIF, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
             us2Data(data, (uint16_t) blob.size()+8, bigEndian);
             ul2Data(data, (uint32_t) blob.size(), littleEndian);
-            if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+            if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
             if (outIo.write((const byte*)&blob[0], static_cast<long>(blob.size())) != (long)blob.size())
             {
-                throw Error(kerImageWriteFailed);
+                throw Error(ErrorCode::kerImageWriteFailed);
             }
             if (outIo.tell() % 2) {
-                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(kerImageWriteFailed);
+                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(ErrorCode::kerImageWriteFailed);
             }
         }
 
         if (has_xmp) {
-            if (outIo.write((const byte*)WEBP_CHUNK_HEADER_XMP, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+            if (outIo.write((const byte*)WEBP_CHUNK_HEADER_XMP, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
             ul2Data(data, (uint32_t) xmpPacket().size(), littleEndian);
-            if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+            if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
             if (outIo.write((const byte*)xmp.data(), static_cast<long>(xmp.size())) != (long)xmp.size()) {
-                throw Error(kerImageWriteFailed);
+                throw Error(ErrorCode::kerImageWriteFailed);
             }
             if (outIo.tell() % 2) {
-                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(kerImageWriteFailed);
+                if (outIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(ErrorCode::kerImageWriteFailed);
             }
         }
 
@@ -402,7 +402,7 @@ namespace Exiv2 {
         filesize = outIo.size() - 8;
         outIo.seek(4, BasicIo::beg);
         ul2Data(data, (uint32_t) filesize, littleEndian);
-        if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(kerImageWriteFailed);
+        if (outIo.write(data, WEBP_TAG_SIZE) != WEBP_TAG_SIZE) throw Error(ErrorCode::kerImageWriteFailed);
 
     } // WebPImage::writeMetadata
 
@@ -411,12 +411,12 @@ namespace Exiv2 {
     void WebPImage::printStructure(std::ostream& out, PrintStructureOption option,int depth)
     {
         if (io_->open() != 0) {
-            throw Error(kerDataSourceOpenFailed, io_->path(), strError());
+            throw Error(ErrorCode::kerDataSourceOpenFailed, io_->path(), strError());
         }
         // Ensure this is the correct image type
         if (!isWebPType(*io_, true)) {
-            if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
-            throw Error(kerNotAnImage, "WEBP");
+            if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
+            throw Error(ErrorCode::kerNotAnImage, "WEBP");
         }
 
         bool bPrint  = option==kpsBasic || option==kpsRecursive;
@@ -476,12 +476,12 @@ namespace Exiv2 {
 
     void WebPImage::readMetadata()
     {
-        if (io_->open() != 0) throw Error(kerDataSourceOpenFailed, io_->path(), strError());
+        if (io_->open() != 0) throw Error(ErrorCode::kerDataSourceOpenFailed, io_->path(), strError());
         IoCloser closer(*io_);
         // Ensure that this is the correct image type
         if (!isWebPType(*io_, true)) {
-            if (io_->error() || io_->eof()) throw Error(kerFailedToReadImageData);
-            throw Error(kerNotAJpeg);
+            if (io_->error() || io_->eof()) throw Error(ErrorCode::kerFailedToReadImageData);
+            throw Error(ErrorCode::kerNotAJpeg);
         }
         clearMetadata();
 
@@ -492,7 +492,7 @@ namespace Exiv2 {
         io_->read(data, WEBP_TAG_SIZE * 3);
 
         const uint32_t filesize = Exiv2::getULong(data + WEBP_TAG_SIZE, littleEndian) + 8;
-        enforce(filesize <= io_->size(), Exiv2::kerCorruptedMetadata);
+        enforce(filesize <= io_->size(), Exiv2::ErrorCode::kerCorruptedMetadata);
         WebPImage::decodeChunks(filesize);
 
     } // WebPImage::readMetadata
@@ -512,12 +512,12 @@ namespace Exiv2 {
             io_->read(chunkId.pData_, WEBP_TAG_SIZE);
             io_->read(size_buff, WEBP_TAG_SIZE);
             const uint32_t size = Exiv2::getULong(size_buff, littleEndian);
-            enforce(size <= (filesize - io_->tell()), Exiv2::kerCorruptedMetadata);
+            enforce(size <= (filesize - io_->tell()), Exiv2::ErrorCode::kerCorruptedMetadata);
 
             DataBuf payload(size);
 
             if (equalsWebPTag(chunkId, WEBP_CHUNK_HEADER_VP8X) && !has_canvas_data) {
-                enforce(size >= 10, Exiv2::kerCorruptedMetadata);
+                enforce(size >= 10, Exiv2::ErrorCode::kerCorruptedMetadata);
 
                 has_canvas_data = true;
                 byte size_buf[WEBP_TAG_SIZE];
@@ -534,7 +534,7 @@ namespace Exiv2 {
                 size_buf[3] = 0;
                 pixelHeight_ = Exiv2::getULong(size_buf, littleEndian) + 1;
             } else if (equalsWebPTag(chunkId, WEBP_CHUNK_HEADER_VP8) && !has_canvas_data) {
-                enforce(size >= 10, Exiv2::kerCorruptedMetadata);
+                enforce(size >= 10, Exiv2::ErrorCode::kerCorruptedMetadata);
 
                 has_canvas_data = true;
                 io_->read(payload.pData_, payload.size_);
@@ -552,7 +552,7 @@ namespace Exiv2 {
                 size_buf[3] = 0;
                 pixelHeight_ = Exiv2::getULong(size_buf, littleEndian) & 0x3fff;
             } else if (equalsWebPTag(chunkId, WEBP_CHUNK_HEADER_VP8L) && !has_canvas_data) {
-                enforce(size >= 5, Exiv2::kerCorruptedMetadata);
+                enforce(size >= 5, Exiv2::ErrorCode::kerCorruptedMetadata);
 
                 has_canvas_data = true;
                 byte size_buf_w[2];
@@ -571,7 +571,7 @@ namespace Exiv2 {
                 size_buf_h[1] = ((size_buf_h[1] >> 6) & 0x3) | ((size_buf_h[2] & 0xF) << 0x2);
                 pixelHeight_ = Exiv2::getUShort(size_buf_h, littleEndian) + 1;
             } else if (equalsWebPTag(chunkId, WEBP_CHUNK_HEADER_ANMF) && !has_canvas_data) {
-                enforce(size >= 12, Exiv2::kerCorruptedMetadata);
+                enforce(size >= 12, Exiv2::ErrorCode::kerCorruptedMetadata);
 
                 has_canvas_data = true;
                 byte size_buf[WEBP_TAG_SIZE];
@@ -788,13 +788,13 @@ namespace Exiv2 {
             byte size_buff[WEBP_TAG_SIZE];
             ul2Data(size_buff, iccProfile_.size_, littleEndian);
             if (iIo.write((const byte*)WEBP_CHUNK_HEADER_VP8X, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                throw Error(kerImageWriteFailed);
+                throw Error(ErrorCode::kerImageWriteFailed);
             if (iIo.write(size_buff, WEBP_TAG_SIZE) != WEBP_TAG_SIZE)
-                throw Error(kerImageWriteFailed);
+                throw Error(ErrorCode::kerImageWriteFailed);
             if (iIo.write(iccProfile_.pData_, iccProfile_.size_) != iccProfile_.size_)
-                throw Error(kerImageWriteFailed);
+                throw Error(ErrorCode::kerImageWriteFailed);
             if (iIo.tell() % 2) {
-                if (iIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(kerImageWriteFailed);
+                if (iIo.write(&WEBP_PAD_ODD, 1) != 1) throw Error(ErrorCode::kerImageWriteFailed);
             }
 
             has_icc = false;

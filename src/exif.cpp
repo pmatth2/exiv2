@@ -229,7 +229,7 @@ namespace Exiv2 {
 
     const Value& Exifdatum::value() const
     {
-        if (value_.get() == 0) throw Error(kerValueNotSet);
+        if (value_.get() == 0) throw Error(ErrorCode::kerValueNotSet);
         return *value_;
     }
 
