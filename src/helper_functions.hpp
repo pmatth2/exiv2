@@ -44,3 +44,10 @@
 
  */
 std::string string_from_unterminated(const char* data, size_t data_length);
+
+/// Convert a wide string to a narrow byte string encoded with your current locale's encoding
+///
+/// @param[in] wStr  Wide string to be decoded
+///
+/// @return A narrow byte version of `wStr` or an empty string if `wStr` contains invalid characters.
+std::string wideStr2Str(const std::wstring& wStr);
