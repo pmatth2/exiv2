@@ -25,6 +25,8 @@
   @date    25-May-18, D4N: created
  */
 
+#include <config.h>
+
 #include "helper_functions.hpp"
 #include "unused.h"
 
