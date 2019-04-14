@@ -30,7 +30,10 @@ struct WideStr2Utf8Test : public ::testing::Test
     WideStr2Utf8Test()
     {
         if (std::setlocale(LC_ALL, "en_US.UTF-8") == nullptr) {
-            throw std::system_error(errno, std::system_category(), "Could not set locale to 'en_US.UTF-8'");
+            if (std::setlocale(LC_ALL, "en_US") == nullptr) {
+                throw std::system_error(errno, std::system_category(),
+                                        "Could not set locale to either 'en_US.UTF-8' or 'en_US'");
+            }
         }
     }
 
