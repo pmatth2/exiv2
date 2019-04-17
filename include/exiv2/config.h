@@ -3,6 +3,8 @@
 ///// Start of Visual Studio Support /////
 #ifdef  _MSC_VER
 
+#define EXV_NOINLINE __declspec(noinline)
+
 #define _MSC_VER_2010 1600
 #define _MSC_VER_2008 1500
 
@@ -28,6 +30,11 @@ typedef int pid_t;
 #endif
 
 #endif // _MSC_VER
+
+#if defined(__GNUC__) || defined(__clang__)
+#define EXV_NOINLINE __attribute__((noinline))
+#endif // gcc or clang
+
 ///// End of Visual Studio Support /////
 
 #include "exv_conf.h"

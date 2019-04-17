@@ -27,7 +27,7 @@ TEST(string_from_unterminated, unterminatedArray)
 
 struct WideStr2Utf8Test : public ::testing::Test
 {
-    WideStr2Utf8Test()
+    EXV_NOINLINE WideStr2Utf8Test()
     {
         if (std::setlocale(LC_ALL, "en_US.UTF-8") == nullptr) {
             if (std::setlocale(LC_ALL, "en_US") == nullptr) {
@@ -56,7 +56,10 @@ TEST_F(WideStr2Utf8Test, UtfString)
     const std::wstring wStr{L"This String cöntains Special characters: zß水"};
     const std::string res = wideStr2Str(wStr);
 
+    // clang-format off
+    // clang format adds a space between u8 and the string
     ASSERT_STREQ(res.c_str(), u8"This String cöntains Special characters: zß水");
+    // clang-format on
 }
 
 TEST_F(WideStr2Utf8Test, invalidUnicodeStringConversion)
