@@ -221,9 +221,9 @@ namespace Exiv2 {
         { 2, ttUnsignedShort, 1 } // The array contains 4 bytes
     };
 
-    //! Nikon Auto Focus 21 binary array - configuration
-    extern const ArrayCfg nikonAf21Cfg = {
-        nikonAf21Id,      // Group for the elements
+    //! Nikon Auto Focus 2 binary array - configuration
+    extern const ArrayCfg nikonAf2Cfg = {
+        nikonAf2Id,       // Group for the elements
         invalidByteOrder, // Use byte order from parent
         ttUndefined,      // Type for array entry
         notEncrypted,     // Not encrypted
@@ -232,8 +232,8 @@ namespace Exiv2 {
         true,             // Concatenate gaps
         { 0, ttUnsignedByte,  1 }
     };
-    //! Nikon Auto Focus 21 binary array - definition
-    extern const ArrayDef nikonAf21Def[] = {
+    //! Nikon Auto Focus 2 binary array - definition
+    extern const ArrayDef nikonAf2Def[] = {
         {  0, ttUndefined,     4 }, // Version
         {  4, ttUnsignedByte,  1 }, // ContrastDetectAF
         {  5, ttUnsignedByte,  1 }, // AFAreaMode
@@ -278,7 +278,7 @@ namespace Exiv2 {
     //! Nikon AF2 configuration and definitions
     //  https://github.com/Exiv2/exiv2/issues/646
     extern const ArraySet nikonAf2Set[] = {
-        { nikonAf21Cfg, nikonAf21Def, EXV_COUNTOF(nikonAf21Def) },
+        { nikonAf2Cfg,  nikonAf2Def , EXV_COUNTOF(nikonAf2Def)  },
         { nikonAf22Cfg, nikonAf22Def, EXV_COUNTOF(nikonAf22Def) },
     };
 
@@ -965,7 +965,7 @@ namespace Exiv2 {
         { Tag::root, nikonLd2Id,       nikon3Id,         0x0098    },
         { Tag::root, nikonLd3Id,       nikon3Id,         0x0098    },
         { Tag::root, nikonMeId,        nikon3Id,         0x00b0    },
-        { Tag::root, nikonAf21Id,      nikon3Id,         0x00b7    },
+        { Tag::root, nikonAf2Id,       nikon3Id,         0x00b7    },
         { Tag::root, nikonAf22Id,      nikon3Id,         0x00b7    },
         { Tag::root, nikonFiId,        nikon3Id,         0x00b8    },
         { Tag::root, nikonAFTId,       nikon3Id,         0x00b9    },
@@ -1334,8 +1334,8 @@ namespace Exiv2 {
         // Nikon3 auto focus
         {  Tag::all, nikonAfId,        newTiffBinaryElement                      },
 
-        // Nikon3 auto focus 2
-        {  Tag::all, nikonAf21Id,      newTiffBinaryElement                      },
+        // Nikon3 AutoFocus2 and AutoFocus22
+        {  Tag::all, nikonAf2Id,       newTiffBinaryElement                      },
         {  Tag::all, nikonAf22Id,      newTiffBinaryElement                      },
 
         // Nikon3 AF Fine Tune
