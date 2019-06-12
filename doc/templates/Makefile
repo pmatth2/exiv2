@@ -69,6 +69,7 @@ TABLES = Exif \
          NikonIi \
          NikonAf \
          NikonAf2 \
+         NikonAf22 \
          NikonAFT \
          NikonFi \
          NikonMe \
